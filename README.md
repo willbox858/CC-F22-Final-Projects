@@ -12,6 +12,7 @@ Space toggles between drawing materials and drawing just the vertecies
 
 Right click toggles the mouse cursor on and off, disabling mouse-look when the cursor is visible.
 
-The contents of the EW folder are functions provided by the professor to ensure that all students had functional cameras, transformation matricies, and projections matricies.
+The contents of the EW folder are functions provided by the professor simplify the usage of OpenGL, as well as 
+to generate vertex data to be fed into the shaders (written by me).
 
 The shader itself was written in GLSL
