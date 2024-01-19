@@ -18,14 +18,18 @@
 #include "imgui/imgui_impl_glfw.h"
 #include "imgui/imgui_impl_opengl3.h"
 
+//The Shader.h and Mesh.h files were both written by the professor to make working with OpenGL shaders/buffers/uniforms easier 
+//ShapeGen.h was also written by the professor, and handles automatically generating the vertex data for certain shapes given 
+//a number of starting values (height, width, depth, position, etc)
 #include "EW/Shader.h"
-#include "EW/EwMath.h"
-#include "EW/Camera.h"
 #include "EW/Mesh.h"
-#include "EW/Transform.h"
 #include "EW/ShapeGen.h"
 
+//
 #include "WBox/Lights.h"
+#include "WBox/Math.h"
+#include "WBox/Camera.h"
+#include "WBox/Transform.h"
 
 void processInput(GLFWwindow* window);
 void resizeFrameBufferCallback(GLFWwindow* window, int width, int height);
@@ -60,13 +64,13 @@ bool firstMouseInput = false;
 const int MOUSE_TOGGLE_BUTTON = 1;
 const float MOUSE_SENSITIVITY = 0.1f;
 
-Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT);
+WB::Camera camera((float)SCREEN_WIDTH / (float)SCREEN_HEIGHT);
 
-Transform cubeTransform;
-Transform sphereTransform;
-Transform coneTransform;
-Transform lightTransform1;
-Transform lightTransform2;
+WB::Transform cubeTransform;
+WB::Transform sphereTransform;
+WB::Transform coneTransform;
+WB::Transform lightTransform1;
+WB::Transform lightTransform2;
 
 glm::vec3 bgColor = glm::vec3(0);
 
@@ -167,12 +171,12 @@ int main() {
 	glPointSize(3.0f);
 
 	//Initialize positions
-	cubeTransform.position = glm::vec3(-2.0f, 0.0f, 0.0f);
-	sphereTransform.position = glm::vec3(0.0f, 0.0f, 0.0f);
-	coneTransform.position = glm::vec3(2.0f,0.0f,0.0f);
+	cubeTransform.mPosition = glm::vec3(-2.0f, 0.0f, 0.0f);
+	sphereTransform.mPosition = glm::vec3(0.0f, 0.0f, 0.0f);
+	coneTransform.mPosition = glm::vec3(2.0f,0.0f,0.0f);
 
-	lightTransform1.scale = glm::vec3(0.5f);
-	lightTransform2.scale = glm::vec3(0.5f);
+	lightTransform1.mScale = glm::vec3(0.5f);
+	lightTransform2.mScale = glm::vec3(0.5f);
 
 	Material testMaterial;
 	testMaterial.mAmbient = glm::vec3(1.0f, 0.5f, 0.31f);
@@ -209,13 +213,13 @@ int main() {
 		lastFrameTime = time;
 
 		//Light position 
-		lightTransform1.position = lightOrbit1Center;
-		lightTransform1.position.x += cosf(time * lightOrbit1Speed) * lightOrbit1Radius;
-		lightTransform1.position.z += sinf(time * lightOrbit1Speed) * lightOrbit1Radius;
+		lightTransform1.mPosition = lightOrbit1Center;
+		lightTransform1.mPosition.x += cosf(time * lightOrbit1Speed) * lightOrbit1Radius;
+		lightTransform1.mPosition.z += sinf(time * lightOrbit1Speed) * lightOrbit1Radius;
 
-		lightTransform2.position = lightOrbit2Center;
-		lightTransform2.position.y += cosf(time * lightOrbit2Speed) * lightOrbit2Radius;
-		lightTransform2.position.z += sinf(time * lightOrbit2Speed) * lightOrbit2Radius;
+		lightTransform2.mPosition = lightOrbit2Center;
+		lightTransform2.mPosition.y += cosf(time * lightOrbit2Speed) * lightOrbit2Radius;
+		lightTransform2.mPosition.z += sinf(time * lightOrbit2Speed) * lightOrbit2Radius;
 
 		//Draw
 		litShader.use();
@@ -223,9 +227,9 @@ int main() {
 		litShader.setMat4("uView", camera.getViewMatrix());
 
 		//TODO: Set material uniforms, lightPos, eyePos
-		litShader.setVec3("light.position", lightTransform1.position);
+		litShader.setVec3("light.position", lightTransform1.mPosition);
  		litShader.setVec3("dirLight.direction", testDirLight.getDirection());
-		litShader.setVec3("uEyePos", camera.position);
+		litShader.setVec3("uEyePos", camera.getPosition());
 
 		litShader.setVec3("uLightColor", lightColor);
 
@@ -245,8 +249,8 @@ int main() {
 		litShader.setFloat("material.shininess", testMaterial.mShininess);
 
 		//Point Light Stuff
-		testPointLightPositions[0] = lightTransform1.position;
-		testPointLightPositions[1] = lightTransform2.position;
+		testPointLightPositions[0] = lightTransform1.mPosition;
+		testPointLightPositions[1] = lightTransform2.mPosition;
 
 		for (int i = 0; i < NUM_OF_POINT_LIGHTS; i++)
 		{
@@ -273,7 +277,7 @@ int main() {
 		std::stringstream ss0, ss1, ss2, ss3, ss4, ss5, ss6, ss7, ss8, ss9;
 		ss0 << "sptLight";
 
-		litShader.setVec3(ss0.str()+".position", camera.position);
+		litShader.setVec3(ss0.str()+".position", camera.getPosition());
 		litShader.setVec3(ss0.str() + ".direction", camera.getForward());
 
 		litShader.setVec3(ss0.str() + ".ambient", spotLightAmbientColor);
@@ -363,7 +367,7 @@ void resizeFrameBufferCallback(GLFWwindow* window, int width, int height)
 {
 	SCREEN_WIDTH = width;
 	SCREEN_HEIGHT = height;
-	camera.aspectRatio = (float)SCREEN_WIDTH / SCREEN_HEIGHT;
+	camera.setAspectRatio((float)SCREEN_WIDTH / SCREEN_HEIGHT);
 	glViewport(0, 0, width, height);
 }
 
@@ -373,10 +377,10 @@ void keyboardCallback(GLFWwindow* window, int keycode, int scancode, int action,
 		glfwSetWindowShouldClose(window, true);
 	}
 	if (keycode == GLFW_KEY_1 && action == GLFW_PRESS) {
-		camera.ortho = false;
+		camera.changeProjection(Projection::perspective);
 	}
 	if (keycode == GLFW_KEY_2 && action == GLFW_PRESS) {
-		camera.ortho = true;
+		camera.changeProjection(Projection::orthographic);
 	}
 	//Toggle between drawing as points
 	if (keycode == GLFW_KEY_SPACE && action == GLFW_PRESS) {
@@ -384,9 +388,9 @@ void keyboardCallback(GLFWwindow* window, int keycode, int scancode, int action,
 	}
 	//Reset camera
 	if (keycode == GLFW_KEY_R && action == GLFW_PRESS) {
-		camera.position = glm::vec3(0,0,5);
-		camera.yaw = -90.0f;
-		camera.pitch = 0.0f;
+		camera.setPosition(glm::vec3(0, 0, 5));
+		camera.setYaw(-90.0f);
+		camera.setPitch(0.0f);
 		firstMouseInput = false;
 	}
 }
@@ -399,12 +403,14 @@ float randomRange(float min, float max)
 void mouseScrollCallback(GLFWwindow* window, double xoffset, double yoffset)
 {
 	if (abs(yoffset) > 0) {
-		camera.fov -= (float)yoffset * camera.zoomSpeed;
-		if (camera.fov < 0.0f) {
-			camera.fov = 0.0f;
+		camera.setFOV(-(float)yoffset * camera.getZoomSpeed());
+		if (camera.getFOV() < 0.0f) 
+		{
+			camera.setFOV(0.0f);
 		}
-		else if (camera.fov > 180.0f) {
-			camera.fov = 180.0f;
+		else if (camera.getFOV() > 180.0f) 
+		{
+			camera.setFOV(180.0f);
 		}
 	}
 }
@@ -419,14 +425,14 @@ void mousePosCallback(GLFWwindow* window, double xpos, double ypos)
 		prevMouseY = ypos;
 		firstMouseInput = true;
 	}
-	camera.yaw += (float)(xpos - prevMouseX) * MOUSE_SENSITIVITY;
-	camera.pitch -= (float)(ypos - prevMouseY) * MOUSE_SENSITIVITY;
+	camera.addYaw((float)(xpos - prevMouseX) * MOUSE_SENSITIVITY);
+	camera.addPitch(-((float)(ypos - prevMouseY) * MOUSE_SENSITIVITY));
 
-	if (camera.pitch < -89.9f) {
-		camera.pitch = -89.9f;
+	if (camera.getPitch() < -89.9f) {
+		camera.setPitch(-89.9f);
 	}
-	else if (camera.pitch > 89.9f) {
-		camera.pitch = 89.9f;
+	else if (camera.getPitch() > 89.9f) {
+		camera.setPitch(89.9f);
 	}
 	prevMouseX = xpos;
 	prevMouseY = ypos;
@@ -454,14 +460,14 @@ float getAxis(GLFWwindow* window, int positiveKey, int negativeKey) {
 }
 
 void processInput(GLFWwindow* window) {
-	float moveAmnt = camera.moveSpeed * deltaTime;
+	float moveAmnt = camera.getMoveSpeed() * deltaTime;
 
 	glm::vec3 forward = camera.getForward();
 	glm::vec3 right = glm::normalize(glm::cross(forward, WORLD_UP));
 	glm::vec3 up = glm::normalize(glm::cross(forward, right));
-	camera.position += forward * getAxis(window, GLFW_KEY_W, GLFW_KEY_S) * moveAmnt;
-	camera.position += right * getAxis(window, GLFW_KEY_D, GLFW_KEY_A) * moveAmnt;
-	camera.position += up * getAxis(window, GLFW_KEY_Q, GLFW_KEY_E) * moveAmnt;
+	camera.addPosition(forward * getAxis(window, GLFW_KEY_W, GLFW_KEY_S) * moveAmnt);
+	camera.addPosition(right * getAxis(window, GLFW_KEY_D, GLFW_KEY_A) * moveAmnt);
+	camera.addPosition(up * getAxis(window, GLFW_KEY_Q, GLFW_KEY_E) * moveAmnt);
 }
 
 glm::vec3 getPointOnSphere(float radius)

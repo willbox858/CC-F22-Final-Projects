@@ -53,16 +53,7 @@
     <ClInclude Include="EW\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="EW\EwMath.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EW\Camera.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="EW\Mesh.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="EW\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="EW\ShapeGen.h">
@@ -96,6 +87,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="WBox\Lights.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WBox\Math.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WBox\Camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WBox\Transform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
