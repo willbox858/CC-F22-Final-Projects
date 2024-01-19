@@ -14,4 +14,4 @@ Right click toggles the mouse cursor on and off, disabling mouse-look when the c
 
 The contents of the EW folder are functions provided by the professor to ensure that all students had functional cameras, transformation matricies, and projections matricies.
 
-The shader was written in OpenGL
+The shader itself was written in GLSL
